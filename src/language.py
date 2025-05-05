@@ -1,52 +1,61 @@
-﻿import enum
-import subprocess
-from json import load as json_load
-from dataclasses import dataclass
+﻿import json
+import enum
+from typing import Optional
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from src.exceptions import NoLanguage, InvalidLanguagePath
+from src.config import LANG_SETUP_PATH
 
+LANGUAGE_CODES = json.load(open(LANG_SETUP_PATH, 'r', encoding="utf-8-sig"))
 
-@dataclass
-class Language(enum.StrEnum):
-    RU = 'data/languages/ru.json'
-    EN = 'data/languages/en.json'
-    LV = 'data/languages/lv.json'
-
-@dataclass
 class Context(enum.StrEnum):
     WELCOME = "welcome"
 
-
-
 class LanguageManager:
-    def __init__(self, language: Language | str = Language.EN) -> None:
-        self._language: Language = language
-        self._data: dict | None = None
+    def __init__(self, language_code: str = "en") -> None:
+        self._language_code: str = language_code.lower()
+        self._data: Optional[dict] = None
 
-    def set_language(self, language: Language | str = Language.EN) -> None:
-        self._language = language
+    def set_language(self, language_code: str) -> None:
+        if not self.has_language(language_code):
+            raise NoLanguage(f"Language '{language_code}' not supported.")
+        self._language_code = language_code.upper()
+        self._data = None
 
-    def has_language(self, language_code: str) -> bool:
-        keys = list(Language.__members__.keys())
-        return language_code in keys
+    @staticmethod
+    def has_language(language_code: str) -> bool:
+        return language_code.lower() in LANGUAGE_CODES
 
-
-    # Returns phrase from data/languages/ (if EN -> english phrase, if RU -> russian phrase and etc...)
     def load_data(self) -> dict:
-        if self._language:
-            if not self._data:
-                try:
-                    with open(self._language, 'r', encoding='utf-8-sig') as f:
-                        return json_load(f)
-                except FileNotFoundError:
-                    raise InvalidLanguagePath("Check if file of this language exists(data/languages/)\nThere should be a file with name of your language. Current language path: " + self._language)
-        else:
+        if not self._language_code:
             raise NoLanguage("No language is provided to language manager.")
 
-    def get_phrase(self, context: Context) -> str | None:
-        if self._data:
-            phrase = self._data.get(str(context), None)
-            return phrase
-        else:
-            self._data = self.load_data()
-            return self.get_phrase(context)
+        if not self._data:
+            path = LANGUAGE_CODES.get(self._language_code)
+            try:
+                with open(path, 'r', encoding='utf-8-sig') as f:
+                    self._data = json.load(f)
+            except FileNotFoundError:
+                raise InvalidLanguagePath(f"Language file not found at: {path}")
+        return self._data
+
+    def get_phrase(self, context: Context) -> Optional[str]:
+        if not self._data:
+            self.load_data()
+        return self._data.get(str(context))
+
+        # keyboard = InlineKeyboardMarkup(inline_keyboard=[
+        #     [
+        #         InlineKeyboardButton(text="✅ Yes, English is fine", callback_data="accept_current_language"),
+        #         InlineKeyboardButton(text="🌐 No, change language", callback_data="change_language")
+        #     ]
+        # ])
+class LanguageKeyboardManager:
+    @staticmethod
+    def get_language_keyboard() -> InlineKeyboardMarkup:
+        buttons: list[InlineKeyboardButton] = []
+
+        for code, _ in LANGUAGE_CODES.items():
+            button = InlineKeyboardButton(text=code, callback_data=f"change_language:{code}")
+            buttons.append(button)
+        return InlineKeyboardMarkup(inline_keyboard=[buttons])
