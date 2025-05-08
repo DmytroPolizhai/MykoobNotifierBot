@@ -1,5 +1,5 @@
 ﻿from json import dump, load, JSONDecodeError
-from src.utils.singleton import Singleton
+from src.utils.misc.singleton import Singleton
 
 
 class Storage(dict, metaclass=Singleton):
