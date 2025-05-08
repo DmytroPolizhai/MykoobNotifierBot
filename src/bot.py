@@ -1,7 +1,8 @@
-﻿from aiogram import Bot, Dispatcher, F, Router
+﻿from aiogram import Bot, Dispatcher
 
 # Routers
 from src.handlers.start import router as start_router
+from src.handlers.change_language import router as change_language_router
 
 # Run the bot
 async def start_bot(token: str) -> None:
@@ -10,7 +11,7 @@ async def start_bot(token: str) -> None:
     """
     Add routers here to make them work!
     """
-    dp.include_routers(start_router)
+    dp.include_routers(start_router, change_language_router)
 
 
 

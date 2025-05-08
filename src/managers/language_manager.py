@@ -1,9 +1,9 @@
 ﻿import json
 from typing import Optional
 
-from src.utils.misc.enums import Context
-from src.utils.misc.folder_scanner import get_language_codes
-from src.utils.managers.manager import Manager
+from src.utils.enums import Context
+from src.utils.folder_scanner import get_language_codes
+from src.managers.manager import Manager
 
 
 class LanguageManager(Manager):
@@ -33,6 +33,10 @@ class LanguageManager(Manager):
             raise ValueError("No language codes provided.")
 
         return codes
+
+    @property
+    def all_language_codes(self) -> list[str]:
+        return list(self._language_codes.keys())
 
     def set_language(self, new_language_code: str) -> None:
         """

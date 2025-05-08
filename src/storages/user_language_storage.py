@@ -1,5 +1,5 @@
 ﻿from src.config import USERS_LANG_PATH
-from src.utils.storages.storage import Storage
+from src.storages.storage import Storage
 
 class UserLanguageStorage(Storage):
     def __init__(self, **kwargs) -> None:

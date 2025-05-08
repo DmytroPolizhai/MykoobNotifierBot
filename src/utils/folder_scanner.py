@@ -1,10 +1,12 @@
 ﻿import os
 import json
+from functools import cache
 from collections import defaultdict
 
 from src.config import LANGUAGES_PATH
 
 
+@cache
 def get_language_codes() -> dict[str, str]:
     language_names = defaultdict()
 
