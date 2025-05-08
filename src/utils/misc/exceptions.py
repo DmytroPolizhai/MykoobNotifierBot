@@ -1,5 +1,5 @@
-﻿class NoLanguage(Exception):
-    """Custom exception raised when no language is provided."""
+﻿class NoLanguageCode(Exception):
+    """Custom exception raised when no language code is provided."""
     pass
 
 class InvalidLanguagePath(Exception):
